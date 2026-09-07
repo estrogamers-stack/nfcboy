@@ -1,39 +1,74 @@
-# NFC Boy — prueba 2048
-
-Demo para GitHub Pages.
+# NFC BOY V3
 
 ## Qué hace
-- Abres la URL.
-- EmulatorJS carga automáticamente.
-- 2048 para Game Boy arranca sin selector de ROM.
-- Controles táctiles del emulador.
-- Service Worker básico para cachear recursos visitados.
 
-## Juego de prueba
-2048-gb de Wyatt Ferguson.
-Repositorio: https://github.com/wyattferguson/2048-gb
-Licencia: MIT.
+- NFC -> URL de GitHub Pages -> juego directo.
+- Sin selector de ROM.
+- Detecta automáticamente:
+  1. `rom/juego.gba`
+  2. `rom/juego.gbc`
+  3. `rom/juego.gb`
+- Incluye `rom/juego.gb`, una ROM de prueba original que muestra "NFC BOY TEST".
+- Usa EmulatorJS 4.2.3 fijado a una versión concreta.
+- La primera ejecución descarga el motor/core.
+- El Service Worker almacena los recursos para siguientes aperturas offline.
+- EmulatorJS conserva sus datos/guardados en el almacenamiento del navegador.
 
-## Motor
-EmulatorJS:
-https://github.com/EmulatorJS/EmulatorJS
+## DÓNDE PONER TU ROM
 
-Esta DEMO usa el CDN oficial de EmulatorJS y la ROM MIT desde GitHub.
-La versión final puede copiar ambos dentro del mismo repositorio para
-hacerla completamente self-hosted.
+Entra en la carpeta:
 
-## Subir a GitHub Pages
-1. Crea un repositorio, por ejemplo `nfcboy`.
-2. Sube index.html, manifest.webmanifest y sw.js a la raíz.
-3. Settings > Pages.
-4. Deploy from a branch.
-5. Branch: main / root.
-6. GitHub te dará una URL tipo:
-   https://TUUSUARIO.github.io/nfcboy/
-7. Esa URL es la que grabas en el NFC.
+    rom/
 
-## Offline
-La primera visita necesita Internet.
-Después de ejecutar el juego una vez, el Service Worker intenta reutilizar
-los recursos ya descargados. La versión final self-hosted permitirá
-controlar este caché con mucha más precisión.
+Para Game Boy:
+    reemplaza `juego.gb`
+
+Para Game Boy Color:
+    sube `juego.gbc`
+
+Para Game Boy Advance:
+    sube `juego.gba`
+
+No necesitas editar el HTML ni JavaScript. La web detecta la consola por el archivo.
+
+Si hay más de una ROM, tiene prioridad:
+GBA > GBC > GB.
+
+## SUBIR A GITHUB
+
+Sube TODO el contenido de esta carpeta a la raíz de tu repositorio:
+
+    index.html
+    app.js
+    sw.js
+    manifest.webmanifest
+    icons/
+    rom/
+
+GitHub:
+Settings -> Pages -> Deploy from a branch -> main -> /(root)
+
+## IMPORTANTE: PRIMERA CARGA
+
+La primera ejecución necesita Internet porque descarga EmulatorJS 4.2.3 y
+el core correspondiente desde el CDN oficial.
+
+Después, el Service Worker cachea los recursos. En Safari/iPhone el sistema
+puede eliminar datos web por presión de almacenamiento o políticas del navegador,
+por lo que "offline" no equivale a almacenamiento permanente garantizado.
+
+Para máxima persistencia en iPhone, también puedes añadir la web a la pantalla
+de inicio como PWA.
+
+## CAMBIAR EL JUEGO
+
+Mantén siempre el nombre:
+- juego.gb
+- juego.gbc
+- juego.gba
+
+Así no necesitas volver a modificar el NFC: la URL sigue siendo la misma.
+
+## ROMS
+
+Usa únicamente ROMs que tengas derecho a alojar/distribuir.
