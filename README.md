@@ -1,36 +1,26 @@
-# NFC BOY V3.1 — FIX DE ROM CACHEADA
+# NFC BOY V3.2 — GUARDADO AUTOMÁTICO
 
-Esta versión corrige el problema por el que seguía apareciendo `NFC BOY TEST`.
+Esta versión corrige el problema de partidas que no quedaban persistidas.
 
-## IMPORTANTE
-NO incluye ninguna ROM de prueba.
+## Cambios
+- `EJS_fixedSaveInterval = 5000`: fuerza el volcado del save cada 5 segundos.
+- `EJS_gameName = "NFCBOY_GAME"` y `EJS_gameID = 731032`: identificadores estables.
+- `EJS_onSaveUpdate`: muestra `PARTIDA GUARDADA ✓` cuando cambia el save.
+- Solicita almacenamiento persistente con `navigator.storage.persist()`.
+- Service Worker actualizado.
+- La ROM sigue siendo network-first para que puedas sustituirla sin arrastrar la antigua.
 
-Debes subir tu ROM en:
+## Instalación
+1. Sustituye en GitHub los archivos de esta carpeta.
+2. Mantén tu ROM en `/rom` con uno de estos nombres:
+   - `juego.gba`
+   - `juego.gbc`
+   - `juego.gb`
+3. Abre:
+   `https://TUUSUARIO.github.io/nfcboy/?savefix=32`
+4. Guarda DENTRO DEL JUEGO y espera 5–10 segundos.
+5. Debería aparecer `PARTIDA GUARDADA ✓`.
+6. Cierra y vuelve a abrir para comprobarlo.
 
-- `rom/juego.gba` para Game Boy Advance
-- `rom/juego.gbc` para Game Boy Color
-- `rom/juego.gb` para Game Boy
-
-## Qué se ha corregido
-
-La V3 metía `rom/juego.gb` dentro del APP_SHELL del Service Worker y utilizaba
-cache-first. Eso podía hacer que la ROM TEST antigua siguiera apareciendo.
-
-V3.1:
-- NO precachea ninguna ROM.
-- Con Internet: ROM = NETWORK FIRST.
-- Sin Internet: usa la última ROM que haya quedado cacheada.
-- Añade query anti-caché al cargar la ROM online.
-- Cambia el nombre de versión del Service Worker.
-
-## Para limpiar la versión anterior
-
-1. Sube estos archivos reemplazando los anteriores.
-2. Deja SOLO tu ROM dentro de `/rom`.
-3. Abre una vez:
-   https://TUUSUARIO.github.io/nfcboy/?fix=31
-4. Recarga una segunda vez si Safari todavía tenía el worker antiguo activo.
-
-Si aun apareciese TEST después de eso:
-Ajustes iPhone -> Apps -> Safari -> Avanzado -> Datos de sitios web ->
-busca github.io -> elimina los datos de tu sitio, y abre la web de nuevo.
+## Nota
+El guardado normal del juego (SAV/SRAM) y los Save States son cosas distintas.

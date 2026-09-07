@@ -14,6 +14,26 @@
   const msg = document.getElementById("bootMsg");
   const detail = document.getElementById("bootDetail");
   const offline = document.getElementById("offline");
+  const saveBadge = document.getElementById("saveBadge");
+  let saveBadgeTimer;
+
+  function flashSaved() {
+    if (!saveBadge) return;
+    saveBadge.classList.add("show");
+    clearTimeout(saveBadgeTimer);
+    saveBadgeTimer = setTimeout(() => saveBadge.classList.remove("show"), 1400);
+  }
+
+  async function requestPersistentStorage() {
+    try {
+      if (navigator.storage?.persist) {
+        const persisted = await navigator.storage.persist();
+        console.log("Persistent storage:", persisted);
+      }
+    } catch (e) {
+      console.warn("Persistent storage request failed:", e);
+    }
+  }
 
   function setStatus(text, extra="") {
     msg.textContent = text;
@@ -43,7 +63,7 @@
   async function ensureServiceWorker() {
     if (!("serviceWorker" in navigator) || location.protocol !== "https:") return;
     try {
-      await navigator.serviceWorker.register("./sw.js?v=31", { scope:"./" });
+      await navigator.serviceWorker.register("./sw.js?v=32", { scope:"./" });
       await navigator.serviceWorker.ready;
     } catch (err) {
       console.warn("SW:", err);
@@ -83,8 +103,23 @@
     window.EJS_core = game.core;
     window.EJS_gameUrl = romUrl;
     window.EJS_gameName = "NFCBOY_GAME";
+    window.EJS_gameID = 731032;
+
     window.EJS_pathtodata = EJS_DATA;
     window.EJS_startOnLoaded = true;
+
+    // Fuerza a EmulatorJS a escribir el save del cartucho cada 5 segundos.
+    window.EJS_fixedSaveInterval = 5000;
+
+    // Aviso visual cuando el contenido real del save cambia.
+    window.EJS_onSaveUpdate = function(e) {
+      console.log("Game save updated", e?.hash || "");
+      flashSaved();
+    };
+
+    window.EJS_onGameStart = function() {
+      requestPersistentStorage();
+    };
     window.EJS_volume = 0.7;
     window.EJS_disableAutoLang = true;
     window.EJS_language = "en-US";

@@ -28,6 +28,16 @@
       z-index:999998;background:#111c;color:#fff;padding:5px 8px;border-radius:20px;
       font-size:10px;display:none
     }
+    #saveBadge{
+      position:fixed;left:50%;bottom:max(16px,env(safe-area-inset-bottom));
+      transform:translateX(-50%) translateY(20px);
+      z-index:999997;background:#111d;color:#b7d58a;padding:7px 12px;border-radius:20px;
+      font:700 10px/1 system-ui,-apple-system,sans-serif;
+      opacity:0;pointer-events:none;transition:.2s ease;
+    }
+    #saveBadge.show{
+      opacity:1;transform:translateX(-50%) translateY(0);
+    }
   </style>
 </head>
 <body>
@@ -37,7 +47,8 @@
     <div class="detail" id="bootDetail"></div>
   </div>
   <div id="offline">OFFLINE</div>
+  <div id="saveBadge">PARTIDA GUARDADA ✓</div>
   <div id="game"></div>
-  <script src="./app.js?v=31"></script>
+  <script src="./app.js?v=32"></script>
 </body>
 </html>

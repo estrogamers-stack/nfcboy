@@ -1,11 +1,11 @@
-const VERSION = "nfcboy-v3-1-fix";
+const VERSION = "nfcboy-v3-2-save-fix";
 const STATIC_CACHE = `${VERSION}-static`;
 const RUNTIME_CACHE = `${VERSION}-runtime`;
 
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./app.js?v=31",
+  "./app.js?v=32",
   "./manifest.webmanifest",
   "./icons/icon-192.png",
   "./icons/icon-512.png"
