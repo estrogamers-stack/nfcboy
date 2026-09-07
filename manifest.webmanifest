@@ -1,6 +1,7 @@
 {
   "name": "NFC Boy",
   "short_name": "NFC Boy",
+  "description": "Game Boy/GBA desde NFC con restauración automática de partida.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

@@ -1,23 +1,20 @@
-const VERSION = "nfcboy-v3-2-save-fix";
-const STATIC_CACHE = `${VERSION}-static`;
-const RUNTIME_CACHE = `${VERSION}-runtime`;
+const VERSION = "nfcboy-v4-robust-save";
+const STATIC = `${VERSION}-static`;
+const RUNTIME = `${VERSION}-runtime`;
 
-const APP_SHELL = [
+const SHELL = [
   "./",
   "./index.html",
-  "./app.js?v=32",
+  "./app.js?v=40",
   "./manifest.webmanifest",
   "./icons/icon-192.png",
   "./icons/icon-512.png"
 ];
 
-// IMPORTANT: ROM IS NOT PRECACHED.
-// That was the cause of the old TEST getting stuck.
-
 self.addEventListener("install", event => {
   event.waitUntil(
-    caches.open(STATIC_CACHE)
-      .then(cache => cache.addAll(APP_SHELL))
+    caches.open(STATIC)
+      .then(cache => cache.addAll(SHELL))
       .then(() => self.skipWaiting())
   );
 });
@@ -27,7 +24,7 @@ self.addEventListener("activate", event => {
     caches.keys().then(keys =>
       Promise.all(
         keys
-          .filter(k => ![STATIC_CACHE, RUNTIME_CACHE].includes(k))
+          .filter(k => ![STATIC, RUNTIME].includes(k))
           .map(k => caches.delete(k))
       )
     ).then(() => self.clients.claim())
@@ -36,24 +33,24 @@ self.addEventListener("activate", event => {
 
 async function networkFirst(request) {
   try {
-    const response = await fetch(request);
+    const response = await fetch(request, {cache:"no-store"});
     if (response && (response.ok || response.type === "opaque")) {
-      const cache = await caches.open(RUNTIME_CACHE);
+      const cache = await caches.open(RUNTIME);
       try { await cache.put(request, response.clone()); } catch (_) {}
     }
     return response;
   } catch (_) {
-    const cached = await caches.match(request, {ignoreSearch:true});
-    return cached || Response.error();
+    return (await caches.match(request, {ignoreSearch:true})) || Response.error();
   }
 }
 
 async function cacheFirst(request) {
-  const cached = await caches.match(request);
+  const cached = await caches.match(request, {ignoreSearch:false});
   if (cached) return cached;
+
   const response = await fetch(request);
   if (response && (response.ok || response.type === "opaque")) {
-    const cache = await caches.open(RUNTIME_CACHE);
+    const cache = await caches.open(RUNTIME);
     try { await cache.put(request, response.clone()); } catch (_) {}
   }
   return response;
@@ -62,7 +59,6 @@ async function cacheFirst(request) {
 self.addEventListener("fetch", event => {
   const request = event.request;
   if (request.method !== "GET") return;
-
   const url = new URL(request.url);
 
   if (request.mode === "navigate") {
@@ -70,16 +66,18 @@ self.addEventListener("fetch", event => {
     return;
   }
 
-  // ROMS: ONLINE = always ask GitHub/network first.
-  // OFFLINE = fall back to the last cached copy.
-  if (url.pathname.includes("/rom/") &&
-      (url.pathname.endsWith(".gb") ||
-       url.pathname.endsWith(".gbc") ||
-       url.pathname.endsWith(".gba"))) {
+  // ROM: network-first when online, cached copy when offline.
+  // Crucially, the URL itself stays stable; app.js no longer adds timestamps.
+  if (
+    url.pathname.includes("/rom/") &&
+    (url.pathname.endsWith(".gb") ||
+     url.pathname.endsWith(".gbc") ||
+     url.pathname.endsWith(".gba"))
+  ) {
     event.respondWith(networkFirst(request));
     return;
   }
 
-  // EmulatorJS engine/core and static app files can be cache-first.
+  // EmulatorJS engine/core and app shell.
   event.respondWith(cacheFirst(request));
 });

@@ -20,24 +20,23 @@
       background:#000;color:#b7d58a;text-align:center;padding:24px;
     }
     #boot .logo{font:900 32px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.17em}
-    #boot .msg{margin-top:18px;font-size:13px;opacity:.78}
-    #boot .detail{margin-top:12px;font:11px/1.5 ui-monospace,monospace;opacity:.65;max-width:520px}
+    #boot .msg{margin-top:18px;font-size:13px;opacity:.8}
+    #boot .detail{margin-top:12px;font:11px/1.5 ui-monospace,monospace;opacity:.6;max-width:540px}
     #boot.error .logo{color:#ff8282}
     #offline{
       position:fixed;right:10px;top:max(10px,env(safe-area-inset-top));
       z-index:999998;background:#111c;color:#fff;padding:5px 8px;border-radius:20px;
       font-size:10px;display:none
     }
-    #saveBadge{
-      position:fixed;left:50%;bottom:max(16px,env(safe-area-inset-bottom));
-      transform:translateX(-50%) translateY(20px);
-      z-index:999997;background:#111d;color:#b7d58a;padding:7px 12px;border-radius:20px;
+    #toast{
+      position:fixed;left:50%;bottom:max(18px,env(safe-area-inset-bottom));
+      transform:translateX(-50%) translateY(18px);
+      z-index:999997;background:#111e;color:#b7d58a;padding:8px 12px;border-radius:22px;
       font:700 10px/1 system-ui,-apple-system,sans-serif;
       opacity:0;pointer-events:none;transition:.2s ease;
+      white-space:nowrap
     }
-    #saveBadge.show{
-      opacity:1;transform:translateX(-50%) translateY(0);
-    }
+    #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
   </style>
 </head>
 <body>
@@ -47,8 +46,8 @@
     <div class="detail" id="bootDetail"></div>
   </div>
   <div id="offline">OFFLINE</div>
-  <div id="saveBadge">PARTIDA GUARDADA ✓</div>
+  <div id="toast"></div>
   <div id="game"></div>
-  <script src="./app.js?v=32"></script>
+  <script src="./app.js?v=40"></script>
 </body>
 </html>
