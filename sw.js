@@ -1,4 +1,4 @@
-const VERSION = "nfcboy-v3-1";
+const VERSION = "nfcboy-v3-2";
 const STATIC_CACHE = `${VERSION}-static`;
 const RUNTIME_CACHE = `${VERSION}-runtime`;
 
