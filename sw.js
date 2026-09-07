@@ -1,11 +1,11 @@
-const VERSION = "nfcboy-v4-robust-save";
+const VERSION = "nfcboy-v4-1-subtle-save";
 const STATIC = `${VERSION}-static`;
 const RUNTIME = `${VERSION}-runtime`;
 
 const SHELL = [
   "./",
   "./index.html",
-  "./app.js?v=40",
+  "./app.js?v=41",
   "./manifest.webmanifest",
   "./icons/icon-192.png",
   "./icons/icon-512.png"

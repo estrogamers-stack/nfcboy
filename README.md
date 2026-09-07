@@ -72,3 +72,18 @@ cambie debajo del proyecto.
 El estado se guarda en IndexedDB del navegador, NO en GitHub.
 
 Si borras los datos del sitio en Safari, se elimina también la partida.
+
+
+## V4.1 — Indicador discreto de guardado
+
+Se elimina el texto `PARTIDA GUARDADA ✓`.
+
+Ahora aparece únicamente un pequeño círculo con `✓` en la esquina inferior derecha
+durante menos de un segundo cuando se crea un nuevo autosave.
+
+También se usa el mismo indicador al restaurar una partida al entrar, sin textos
+que tapen el juego.
+
+Prueba esta versión con:
+
+    https://TUUSUARIO.github.io/nfcboy/?v=41

@@ -20,13 +20,13 @@
   const msg = document.getElementById("bootMsg");
   const detail = document.getElementById("bootDetail");
   const offline = document.getElementById("offline");
-  const toast = document.getElementById("toast");
+  const saveIcon = document.getElementById("saveIcon");
 
   let currentGame = null;
   let currentGameKey = null;
   let autosaveTimer = null;
   let loadedStateBlobUrl = null;
-  let toastTimer = null;
+  let saveIconTimer = null;
   let lastStateSignature = "";
 
   function status(text, extra="") {
@@ -39,12 +39,11 @@
     status(text, extra);
   }
 
-  function flash(text, ms=1400) {
-    if (!toast) return;
-    toast.textContent = text;
-    toast.classList.add("show");
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => toast.classList.remove("show"), ms);
+  function flashSaveIcon(ms=850) {
+    if (!saveIcon) return;
+    saveIcon.classList.add("show");
+    clearTimeout(saveIconTimer);
+    saveIconTimer = setTimeout(() => saveIcon.classList.remove("show"), ms);
   }
 
   function onlineBadge() {
@@ -103,7 +102,7 @@
   async function registerSW() {
     if (!("serviceWorker" in navigator) || location.protocol !== "https:") return;
     try {
-      await navigator.serviceWorker.register("./sw.js?v=40", { scope:"./" });
+      await navigator.serviceWorker.register("./sw.js?v=41", { scope:"./" });
       await navigator.serviceWorker.ready;
     } catch (e) {
       console.warn("[NFC BOY] SW:", e);
@@ -213,7 +212,7 @@
     });
 
     lastStateSignature = sig;
-    if (showToast) flash("PARTIDA GUARDADA ✓");
+    if (showToast) flashSaveIcon();
     console.log("[NFC BOY] autosave state:", copy.byteLength);
     return true;
   }
@@ -265,7 +264,7 @@
       requestPersistentStorage();
       startAutosave();
       if (restored?.url) {
-        setTimeout(() => flash("PARTIDA RESTAURADA ✓", 1800), 1000);
+        setTimeout(() => flashSaveIcon(1100), 1000);
       }
     };
   }
