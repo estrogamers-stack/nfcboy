@@ -3,6 +3,7 @@
   const EJS_DATA = `https://cdn.emulatorjs.org/${EJS_VERSION}/data/`;
   const EJS_LOADER = `${EJS_DATA}loader.js`;
 
+  // Busca automáticamente estos nombres.
   const games = [
     { url: "./rom/juego.gba", core: "gba", label: "Game Boy Advance" },
     { url: "./rom/juego.gbc", core: "gb",  label: "Game Boy Color" },
@@ -32,64 +33,55 @@
   updateOnlineBadge();
 
   addEventListener("error", e => {
-    if (boot) showError("Error al iniciar", e.message || "Error desconocido");
+    if (document.body.contains(boot)) showError("Error al iniciar", e.message || "Error desconocido");
   });
 
   addEventListener("unhandledrejection", e => {
-    if (boot) showError("Error al cargar recursos", String(e.reason || e));
+    if (document.body.contains(boot)) showError("Error al cargar recursos", String(e.reason || e));
   });
 
   async function ensureServiceWorker() {
     if (!("serviceWorker" in navigator) || location.protocol !== "https:") return;
-
     try {
-      setStatus("Preparando modo offline…");
-      await navigator.serviceWorker.register("./sw.js", { scope: "./" });
+      await navigator.serviceWorker.register("./sw.js?v=31", { scope:"./" });
       await navigator.serviceWorker.ready;
-
-      // On the very first visit the page may not yet be controlled.
-      // One automatic reload makes sure EmulatorJS + core downloads pass
-      // through the service worker and are cached.
-      if (!navigator.serviceWorker.controller &&
-          !sessionStorage.getItem("nfcboy-sw-reload")) {
-        sessionStorage.setItem("nfcboy-sw-reload", "1");
-
-        await Promise.race([
-          new Promise(resolve => {
-            navigator.serviceWorker.addEventListener("controllerchange", resolve, { once:true });
-          }),
-          new Promise(resolve => setTimeout(resolve, 1500))
-        ]);
-
-        location.reload();
-        return new Promise(() => {});
-      }
-
-      sessionStorage.removeItem("nfcboy-sw-reload");
     } catch (err) {
-      console.warn("Service Worker no disponible:", err);
+      console.warn("SW:", err);
+    }
+  }
+
+  async function exists(url) {
+    try {
+      // cache-busting query prevents stale ROM detection while online.
+      const testUrl = navigator.onLine
+        ? `${url}?romcheck=${Date.now()}`
+        : url;
+      const r = await fetch(testUrl, { cache:"no-store" });
+      return r.ok;
+    } catch (_) {
+      return false;
     }
   }
 
   async function findGame() {
-    setStatus("Buscando juego…");
-
+    setStatus("Buscando tu ROM…");
     for (const game of games) {
-      try {
-        const r = await fetch(game.url, { cache:"no-store" });
-        if (r.ok) return game;
-      } catch (_) {}
+      if (await exists(game.url)) return game;
     }
-
     throw new Error(
-      "No encuentro ninguna ROM. Sube un archivo llamado juego.gb, juego.gbc o juego.gba dentro de la carpeta /rom."
+      "No encuentro ninguna ROM en /rom. Renombra la tuya a juego.gba, juego.gbc o juego.gb."
     );
   }
 
   function configureEmulator(game) {
+    // Add version query to force fresh ROM when online.
+    const romUrl = navigator.onLine
+      ? `${game.url}?v=${Date.now()}`
+      : game.url;
+
     window.EJS_player = "#game";
     window.EJS_core = game.core;
-    window.EJS_gameUrl = game.url;
+    window.EJS_gameUrl = romUrl;
     window.EJS_gameName = "NFCBOY_GAME";
     window.EJS_pathtodata = EJS_DATA;
     window.EJS_startOnLoaded = true;
@@ -108,38 +100,33 @@
     });
   }
 
-  function watchForGame() {
+  function watchForGame(game) {
     const observer = new MutationObserver(() => {
       if (document.querySelector("#game canvas")) {
         boot?.remove();
         observer.disconnect();
       }
     });
-    observer.observe(document.getElementById("game"), { childList:true, subtree:true });
+    observer.observe(document.getElementById("game"), {childList:true, subtree:true});
 
     setTimeout(() => {
       if (document.body.contains(boot)) {
         setStatus(
-          "El juego está tardando más de lo normal…",
+          `Cargando ${game.label}…`,
           navigator.onLine
-            ? "Recarga una vez si no arranca."
-            : "Conecta a Internet para completar la primera descarga."
+            ? "Si acabas de cambiar la ROM, esta versión ya fuerza la copia nueva de GitHub."
+            : "Modo offline: usando la última ROM guardada."
         );
       }
-    }, 15000);
+    }, 10000);
   }
 
   async function main() {
     await ensureServiceWorker();
     const game = await findGame();
-
-    setStatus(`Abriendo ${game.label}…`,
-      navigator.serviceWorker.controller
-        ? "El motor y el juego se guardarán para futuras aperturas offline."
-        : "");
-
+    setStatus(`Abriendo ${game.label}…`, game.url);
     configureEmulator(game);
-    watchForGame();
+    watchForGame(game);
     await loadEmulator();
   }
 

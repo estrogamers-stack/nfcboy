@@ -1,74 +1,36 @@
-# NFC BOY V3
+# NFC BOY V3.1 — FIX DE ROM CACHEADA
 
-## Qué hace
+Esta versión corrige el problema por el que seguía apareciendo `NFC BOY TEST`.
 
-- NFC -> URL de GitHub Pages -> juego directo.
-- Sin selector de ROM.
-- Detecta automáticamente:
-  1. `rom/juego.gba`
-  2. `rom/juego.gbc`
-  3. `rom/juego.gb`
-- Incluye `rom/juego.gb`, una ROM de prueba original que muestra "NFC BOY TEST".
-- Usa EmulatorJS 4.2.3 fijado a una versión concreta.
-- La primera ejecución descarga el motor/core.
-- El Service Worker almacena los recursos para siguientes aperturas offline.
-- EmulatorJS conserva sus datos/guardados en el almacenamiento del navegador.
+## IMPORTANTE
+NO incluye ninguna ROM de prueba.
 
-## DÓNDE PONER TU ROM
+Debes subir tu ROM en:
 
-Entra en la carpeta:
+- `rom/juego.gba` para Game Boy Advance
+- `rom/juego.gbc` para Game Boy Color
+- `rom/juego.gb` para Game Boy
 
-    rom/
+## Qué se ha corregido
 
-Para Game Boy:
-    reemplaza `juego.gb`
+La V3 metía `rom/juego.gb` dentro del APP_SHELL del Service Worker y utilizaba
+cache-first. Eso podía hacer que la ROM TEST antigua siguiera apareciendo.
 
-Para Game Boy Color:
-    sube `juego.gbc`
+V3.1:
+- NO precachea ninguna ROM.
+- Con Internet: ROM = NETWORK FIRST.
+- Sin Internet: usa la última ROM que haya quedado cacheada.
+- Añade query anti-caché al cargar la ROM online.
+- Cambia el nombre de versión del Service Worker.
 
-Para Game Boy Advance:
-    sube `juego.gba`
+## Para limpiar la versión anterior
 
-No necesitas editar el HTML ni JavaScript. La web detecta la consola por el archivo.
+1. Sube estos archivos reemplazando los anteriores.
+2. Deja SOLO tu ROM dentro de `/rom`.
+3. Abre una vez:
+   https://TUUSUARIO.github.io/nfcboy/?fix=31
+4. Recarga una segunda vez si Safari todavía tenía el worker antiguo activo.
 
-Si hay más de una ROM, tiene prioridad:
-GBA > GBC > GB.
-
-## SUBIR A GITHUB
-
-Sube TODO el contenido de esta carpeta a la raíz de tu repositorio:
-
-    index.html
-    app.js
-    sw.js
-    manifest.webmanifest
-    icons/
-    rom/
-
-GitHub:
-Settings -> Pages -> Deploy from a branch -> main -> /(root)
-
-## IMPORTANTE: PRIMERA CARGA
-
-La primera ejecución necesita Internet porque descarga EmulatorJS 4.2.3 y
-el core correspondiente desde el CDN oficial.
-
-Después, el Service Worker cachea los recursos. En Safari/iPhone el sistema
-puede eliminar datos web por presión de almacenamiento o políticas del navegador,
-por lo que "offline" no equivale a almacenamiento permanente garantizado.
-
-Para máxima persistencia en iPhone, también puedes añadir la web a la pantalla
-de inicio como PWA.
-
-## CAMBIAR EL JUEGO
-
-Mantén siempre el nombre:
-- juego.gb
-- juego.gbc
-- juego.gba
-
-Así no necesitas volver a modificar el NFC: la URL sigue siendo la misma.
-
-## ROMS
-
-Usa únicamente ROMs que tengas derecho a alojar/distribuir.
+Si aun apareciese TEST después de eso:
+Ajustes iPhone -> Apps -> Safari -> Avanzado -> Datos de sitios web ->
+busca github.io -> elimina los datos de tu sitio, y abre la web de nuevo.

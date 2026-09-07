@@ -1,16 +1,18 @@
-const VERSION = "nfcboy-v3-2";
+const VERSION = "nfcboy-v3-1-fix";
 const STATIC_CACHE = `${VERSION}-static`;
 const RUNTIME_CACHE = `${VERSION}-runtime`;
 
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./app.js",
+  "./app.js?v=31",
   "./manifest.webmanifest",
   "./icons/icon-192.png",
-  "./icons/icon-512.png",
-  "./rom/juego.gb"
+  "./icons/icon-512.png"
 ];
+
+// IMPORTANT: ROM IS NOT PRECACHED.
+// That was the cause of the old TEST getting stuck.
 
 self.addEventListener("install", event => {
   event.waitUntil(
@@ -32,12 +34,24 @@ self.addEventListener("activate", event => {
   );
 });
 
+async function networkFirst(request) {
+  try {
+    const response = await fetch(request);
+    if (response && (response.ok || response.type === "opaque")) {
+      const cache = await caches.open(RUNTIME_CACHE);
+      try { await cache.put(request, response.clone()); } catch (_) {}
+    }
+    return response;
+  } catch (_) {
+    const cached = await caches.match(request, {ignoreSearch:true});
+    return cached || Response.error();
+  }
+}
+
 async function cacheFirst(request) {
   const cached = await caches.match(request);
   if (cached) return cached;
-
   const response = await fetch(request);
-  // Cache normal responses and opaque cross-origin CDN responses.
   if (response && (response.ok || response.type === "opaque")) {
     const cache = await caches.open(RUNTIME_CACHE);
     try { await cache.put(request, response.clone()); } catch (_) {}
@@ -45,31 +59,27 @@ async function cacheFirst(request) {
   return response;
 }
 
-async function navigation(request) {
-  try {
-    const response = await fetch(request);
-    if (response && response.ok) {
-      const cache = await caches.open(RUNTIME_CACHE);
-      try { await cache.put(request, response.clone()); } catch (_) {}
-    }
-    return response;
-  } catch (_) {
-    return (await caches.match(request)) ||
-           (await caches.match("./index.html")) ||
-           Response.error();
-  }
-}
-
 self.addEventListener("fetch", event => {
   const request = event.request;
   if (request.method !== "GET") return;
 
+  const url = new URL(request.url);
+
   if (request.mode === "navigate") {
-    event.respondWith(navigation(request));
+    event.respondWith(networkFirst(request));
     return;
   }
 
-  // This intentionally also handles cdn.emulatorjs.org requests:
-  // after the first successful run, those assets/core files live in Cache Storage.
+  // ROMS: ONLINE = always ask GitHub/network first.
+  // OFFLINE = fall back to the last cached copy.
+  if (url.pathname.includes("/rom/") &&
+      (url.pathname.endsWith(".gb") ||
+       url.pathname.endsWith(".gbc") ||
+       url.pathname.endsWith(".gba"))) {
+    event.respondWith(networkFirst(request));
+    return;
+  }
+
+  // EmulatorJS engine/core and static app files can be cache-first.
   event.respondWith(cacheFirst(request));
 });

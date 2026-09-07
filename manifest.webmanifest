@@ -1,7 +1,6 @@
 {
   "name": "NFC Boy",
   "short_name": "NFC Boy",
-  "description": "Abre un juego de Game Boy directamente desde un NFC.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

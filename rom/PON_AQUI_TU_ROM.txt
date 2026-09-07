@@ -1,0 +1,1 @@
+Renombra tu ROM a juego.gba, juego.gbc o juego.gb.
