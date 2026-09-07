@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0a0a0a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>NFC Boy — 2048</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <style>
+    html,body,#game { width:100%; height:100%; margin:0; background:#000; overflow:hidden; }
+    body { position:fixed; inset:0; }
+    #boot {
+      position:fixed; inset:0; z-index:1000;
+      display:flex; align-items:center; justify-content:center; flex-direction:column;
+      background:#000; color:#b7d58a; font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+      letter-spacing:.16em; text-align:center;
+    }
+    #boot small { opacity:.55; margin-top:14px; letter-spacing:.08em; }
+  </style>
+</head>
+<body>
+  <div id="boot">NFC BOY<small>INICIANDO 2048…</small></div>
+  <div id="game"></div>
+
+  <script>
+    // Juego fijo: al abrir esta URL, no hay selector ni biblioteca.
+    window.EJS_player = "#game";
+    window.EJS_core = "gb";
+    window.EJS_gameName = "2048";
+    window.EJS_gameUrl =
+      "https://raw.githubusercontent.com/wyattferguson/2048-gb/master/2048.gb";
+    window.EJS_pathtodata = "https://cdn.emulatorjs.org/stable/data/";
+    window.EJS_startOnLoaded = true;
+    window.EJS_language = "es-ES";
+    window.EJS_volume = 0.75;
+    window.EJS_fullscreenOnLoaded = false;
+
+    // Reduce botones de interfaz; los controles de juego siguen disponibles.
+    window.EJS_Buttons = {
+      playPause: false,
+      restart: false,
+      mute: true,
+      settings: true,
+      fullscreen: true,
+      saveState: true,
+      loadState: true,
+      screenRecord: false,
+      gamepad: false,
+      cheat: false,
+      volume: true,
+      saveSavFiles: true,
+      loadSavFiles: true,
+      quickSave: false,
+      quickLoad: false,
+      screenshot: false,
+      cacheManager: false,
+      exitEmulation: false
+    };
+
+    // Oculta la pantalla de arranque cuando el canvas del emulador aparece.
+    const watch = new MutationObserver(() => {
+      if (document.querySelector("#game canvas")) {
+        document.querySelector("#boot")?.remove();
+        watch.disconnect();
+      }
+    });
+    watch.observe(document.querySelector("#game"), {subtree:true, childList:true});
+
+    // PWA / caché.
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("./sw.js").catch(console.warn);
+    }
+  </script>
+
+  <script src="https://cdn.emulatorjs.org/stable/data/loader.js"></script>
+</body>
+</html>
